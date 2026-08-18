@@ -22,3 +22,5 @@ class ConversationState(BaseModel):
 
     booking_status: Optional[str] = None
     human_escalation_requested: bool = False
+    
+    escalation_id: Optional[str] = None

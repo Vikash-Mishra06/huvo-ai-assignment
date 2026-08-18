@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from app.models.chat import ChatRequest, ChatResponse
 from app.services.agent_service import AgentService
 from app.services.booking_service import BookingService
+from app.services.escalation_service import EscalationService
 from app.services.state_service import StateService
 
 
@@ -11,6 +12,7 @@ router = APIRouter(prefix="/chat", tags=["Conversation"])
 agent_service = AgentService()
 state_service = StateService()
 booking_service = BookingService()
+escalation_service = EscalationService()
 
 
 @router.post("", response_model=ChatResponse)
@@ -22,6 +24,21 @@ def chat(request: ChatRequest):
         message=request.message,
     )
 
+    # Handle requests that need to be transferred to a human representative.
+    if request.escalation_reason:
+        escalation_result = escalation_service.escalate(
+            reason=request.escalation_reason
+        )
+
+        updated_state.human_escalation_requested = True
+        updated_state.escalation_id = escalation_result.escalation_id
+
+        return ChatResponse(
+            response=escalation_result.message,
+            state=updated_state,
+        )
+
+    # Handle site-visit booking only when both date and time are available.
     if request.site_visit_date and request.site_visit_time:
         booking_result = booking_service.book_site_visit(
             date=request.site_visit_date,
