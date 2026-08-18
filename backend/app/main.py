@@ -10,7 +10,7 @@ app = FastAPI(
 
 @app.get("/health")
 def health_check():
-    """Simple endpoint used to confirm that the API is running."""
+    """Confirm that the backend service is running."""
     return {
         "status": "ok",
         "service": "huvo-ai-sales-agent",
