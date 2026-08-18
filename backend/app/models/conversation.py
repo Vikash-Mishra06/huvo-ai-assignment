@@ -24,3 +24,7 @@ class ConversationState(BaseModel):
     human_escalation_requested: bool = False
     
     escalation_id: Optional[str] = None
+    
+    follow_up_requested: bool = False
+    follow_up_time: Optional[str] = None
+    follow_up_id: Optional[str] = None

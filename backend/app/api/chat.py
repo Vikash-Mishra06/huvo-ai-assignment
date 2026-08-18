@@ -5,7 +5,7 @@ from app.services.agent_service import AgentService
 from app.services.booking_service import BookingService
 from app.services.escalation_service import EscalationService
 from app.services.state_service import StateService
-
+from app.services.follow_up_service import FollowUpService
 
 router = APIRouter(prefix="/chat", tags=["Conversation"])
 
@@ -13,7 +13,7 @@ agent_service = AgentService()
 state_service = StateService()
 booking_service = BookingService()
 escalation_service = EscalationService()
-
+follow_up_service = FollowUpService()
 
 @router.post("", response_model=ChatResponse)
 def chat(request: ChatRequest):
@@ -23,6 +23,20 @@ def chat(request: ChatRequest):
         state=request.state,
         message=request.message,
     )
+    
+    if request.follow_up_time:
+        follow_up_result = follow_up_service.schedule_follow_up(
+            preferred_time=request.follow_up_time
+        )
+
+        updated_state.follow_up_requested = True
+        updated_state.follow_up_time = request.follow_up_time
+        updated_state.follow_up_id = follow_up_result.follow_up_id
+
+        return ChatResponse(
+            response=follow_up_result.message,
+            state=updated_state,
+        )
 
     # Handle requests that need to be transferred to a human representative.
     if request.escalation_reason:

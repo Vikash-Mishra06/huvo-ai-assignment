@@ -13,6 +13,7 @@ class ChatRequest(BaseModel):
     site_visit_time: str | None = None
     simulate_booking_failure: bool = False
     escalation_reason: str | None = None
+    follow_up_time: str | None = None
 
 class ChatResponse(BaseModel):
     """Response returned by the conversation endpoint."""
