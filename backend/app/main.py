@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 
-from app.api.test_ai import router as test_ai_router
-
+from app.api.chat import router as chat_router
 
 app = FastAPI(
     title="Huvo AI Sales Agent",
@@ -19,4 +18,4 @@ def health_check():
     }
 
 
-app.include_router(test_ai_router)
+app.include_router(chat_router)
