@@ -9,6 +9,10 @@ class ChatRequest(BaseModel):
     message: str = Field(min_length=1)
     state: ConversationState = Field(default_factory=ConversationState)
 
+    site_visit_date: str | None = None
+    site_visit_time: str | None = None
+    simulate_booking_failure: bool = False
+
 
 class ChatResponse(BaseModel):
     """Response returned by the conversation endpoint."""
