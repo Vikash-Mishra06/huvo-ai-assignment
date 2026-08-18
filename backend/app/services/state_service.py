@@ -63,7 +63,11 @@ class StateService:
         state: ConversationState,
         text: str,
     ) -> None:
-        """Use simple language signals for the initial conversation state."""
+        """Detect whether the customer is speaking English, Hindi, or Hinglish."""
+
+        if re.search(r"[\u0900-\u097F]", text):
+            state.language = "Hindi"
+            return
 
         hindi_words = {
             "bhai",
@@ -77,13 +81,17 @@ class StateService:
             "kitna",
             "ke",
             "liye",
+            "mein",
+            "milega",
+            "chahta",
+            "chahti",
         }
 
         words = set(re.findall(r"\b[a-zA-Z]+\b", text.lower()))
 
-        if words.intersection(hindi_words):
+        if len(words.intersection(hindi_words)) >= 2:
             state.language = "Hinglish"
-        elif text:
+        else:
             state.language = "English"
 
     def _extract_buying_purpose(

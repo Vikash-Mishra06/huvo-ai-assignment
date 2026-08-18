@@ -13,7 +13,19 @@ class MockLLMProvider:
     """Provides deterministic responses while developing without API costs."""
 
     def generate(self, context: str) -> str:
-        """Return a simple response based on the current conversation state."""
+        """Return a deterministic response based on conversation context."""
+
+        if '"language": "Hindi"' in context:
+            return (
+                "समझ गया। आप 3 BHK की तलाश कर रहे हैं। "
+                "कृपया अपना बजट बताइए।"
+            )
+
+        if '"language": "Hinglish"' in context:
+            return (
+                "Bilkul. Aap 3 BHK dekh rahe hain. "
+                "Aapka preferred budget kya hai?"
+            )
 
         if '"property_type": "3 BHK"' in context and '"budget": "₹1.5 Cr"' in context:
             return (
