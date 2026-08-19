@@ -19,6 +19,8 @@ class StateService:
         self._extract_budget(state, text)
         self._extract_language(state, text)
         self._extract_buying_purpose(state, text)
+        self._extract_location(state, text)
+        self._extract_purchase_timeline(state, text)
 
         return state
 
@@ -115,6 +117,8 @@ class StateService:
             "for my family",
             "for myself",
             "for me",
+            "self use",
+            "self-use",
             "khud ke liye",
             "family ke liye",
             "rehne ke liye",
@@ -124,3 +128,66 @@ class StateService:
             state.buying_purpose = "Investment"
         elif any(term in lowered for term in self_use_terms):
             state.buying_purpose = "Self-use"
+
+    def _extract_location(
+        self,
+        state: ConversationState,
+        text: str,
+    ) -> None:
+        """Detect common Gurgaon/Delhi NCR location mentions."""
+
+        known_locations = (
+            "Gurgaon",
+            "Gurugram",
+            "Noida",
+            "Greater Noida",
+            "Delhi",
+            "Faridabad",
+            "Ghaziabad",
+            "Dwarka",
+            "Manesar",
+        )
+
+        lowered = text.lower()
+
+        for location in known_locations:
+            if location.lower() in lowered:
+                state.preferred_location = location
+                return
+
+    def _extract_purchase_timeline(
+        self,
+        state: ConversationState,
+        text: str,
+    ) -> None:
+        """Detect simple purchase timelines such as weeks or months."""
+
+        lowered = text.lower()
+
+        match = re.search(
+            r"\b(?:within|in|after)\s+"
+            r"(\d+(?:\.\d+)?)\s*"
+            r"(week|weeks|month|months|year|years)\b",
+            lowered,
+        )
+
+        if match:
+            amount = match.group(1)
+            unit = match.group(2)
+
+            state.purchase_timeline = f"{amount} {unit}"
+            return
+
+        timeline_phrases = (
+            ("immediately", "Immediately"),
+            ("as soon as possible", "As soon as possible"),
+            ("this month", "This month"),
+            ("next month", "Next month"),
+            ("next year", "Next year"),
+            ("not sure", "Not decided"),
+        )
+
+        for phrase, value in timeline_phrases:
+            if phrase in lowered:
+                state.purchase_timeline = value
+                return
